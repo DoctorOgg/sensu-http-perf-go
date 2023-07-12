@@ -150,6 +150,7 @@ func executeCheck(event *corev2.Event) (int, error) {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: plugin.InsecureSkipVerify,
 		},
+		ResponseHeaderTimeout: time.Duration(plugin.Timeout) * time.Second,
 	}
 
 	client := &http.Client{
