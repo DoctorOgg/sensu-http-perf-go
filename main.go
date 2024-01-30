@@ -22,6 +22,7 @@ type Config struct {
 	OutputInMs         bool
 	InsecureSkipVerify bool
 	TlsTimeout         int
+	UserAgent          string
 }
 
 var (
@@ -97,6 +98,15 @@ var (
 			Usage:     "TLS handshake timeout in milliseconds",
 			Value:     &plugin.TlsTimeout,
 		},
+		&sensu.PluginConfigOption[string]{
+			Path:      "user-agent",
+			Env:       "CHECK_USER_AGENT",
+			Argument:  "user-agent",
+			Shorthand: "a",
+			Default:   "Mozilla/5.0 (Commodore 64; AIX 11; HP/UX 12) AppleWebKit/42.20 (KHTML, like Gecko) EvilGoogle/96.0.4664.45 SafariRocks/537.36",
+			Usage:     "Custom user agent for the HTTP request",
+			Value:     &plugin.UserAgent,
+		},
 	}
 )
 
@@ -120,6 +130,10 @@ func checkArgs(event *corev2.Event) (int, error) {
 
 func executeCheck(event *corev2.Event) (int, error) {
 	req, _ := http.NewRequest("GET", plugin.Url, nil)
+
+	if plugin.UserAgent != "" {
+		req.Header.Set("User-Agent", plugin.UserAgent)
+	}
 
 	var (
 		startTime, connectStart, connectDone, dnsStart, dnsDone, tlsHandshakeStart, tlsHandshakeDone, gotConn, firstResponseByte time.Time
